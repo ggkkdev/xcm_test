@@ -466,12 +466,15 @@ impl<Config: config::Config> XcmExecutor<Config> {
 		&mut self,
 		instr: Instruction<Config::RuntimeCall>,
 	) -> Result<(), XcmError> {
+		println!("instruction: {:?}", instr);
+		println!("origin: {:?}", self.context.origin);
+		println!("holding before: {:?}", self.holding);
 		log::trace!(
 			target: "xcm::process_instruction",
 			"=== {:?}",
 			instr
 		);
-		match instr {
+		let result = match instr {
 			WithdrawAsset(assets) => {
 				// Take `assets` from the origin account (on-chain) and place in holding.
 				let origin = *self.origin_ref().ok_or(XcmError::BadOrigin)?;
@@ -919,7 +922,10 @@ impl<Config: config::Config> XcmExecutor<Config> {
 			HrmpNewChannelOpenRequest { .. } => Err(XcmError::Unimplemented),
 			HrmpChannelAccepted { .. } => Err(XcmError::Unimplemented),
 			HrmpChannelClosing { .. } => Err(XcmError::Unimplemented),
-		}
+		};
+		println!("holding after: {:?} \n", self.holding);
+		result
+
 	}
 
 	fn take_fee(&mut self, fee: MultiAssets, reason: FeeReason) -> XcmResult {

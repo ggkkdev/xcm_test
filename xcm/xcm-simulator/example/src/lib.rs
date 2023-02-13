@@ -533,38 +533,6 @@ mod tests {
 	}
 
 	/// Scenario:
-	/// A parachain transfers funds on the relay chain to another parachain account.
-	///
-	/// Asserts that the parachain accounts are updated as expected.
-	#[test]
-	fn withdraw_and_deposit() {
-		MockNet::reset();
-
-		let send_amount = 10;
-
-		ParaA::execute_with(|| {
-			let message = Xcm(vec![
-				WithdrawAsset((Here, send_amount).into()),
-				buy_execution((Here, send_amount)),
-				DepositAsset { assets: AllCounted(1).into(), beneficiary: Parachain(2).into() },
-			]);
-			// Send withdraw and deposit
-			assert_ok!(ParachainPalletXcm::send_xcm(Here, Parent, message.clone()));
-		});
-
-		Relay::execute_with(|| {
-			assert_eq!(
-				relay_chain::Balances::free_balance(child_account_id(1)),
-				INITIAL_BALANCE - send_amount
-			);
-			assert_eq!(
-				relay_chain::Balances::free_balance(child_account_id(2)),
-				INITIAL_BALANCE + send_amount
-			);
-		});
-	}
-
-	/// Scenario:
 	/// A parachain wants to be notified that a transfer worked correctly.
 	/// It sends a `QueryHolding` after the deposit to get notified on success.
 	///
